@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>물품 목록 - 공용 물품 관리</title>
+<script>
+  (function () {
+    var pref = localStorage.getItem('supply-app-theme') || 'system';
+    var resolved = pref === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : pref;
+    document.documentElement.setAttribute('data-theme', resolved);
+  })();
+</script>
+<link rel="stylesheet" href="assets/css/styles.css?v=1" />
+</head>
+<body>
+  <div class="app-shell">
+    <button id="hamburger-btn" class="hamburger-btn" aria-label="메뉴 열기" aria-expanded="false">☰</button>
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+    <aside id="sidebar" class="sidebar"></aside>
+
+    <main class="content">
+      <h1 class="page-title">물품 목록</h1>
+      <div id="item-error" class="error-banner" hidden></div>
+
+      <div class="toolbar">
+        <input type="search" id="search-input" class="search-input" placeholder="이름, 카테고리, 등록자로 검색" />
+        <div class="sort-group" role="group" aria-label="정렬">
+          <button type="button" class="sort-btn" data-sort="created_at">최신순</button>
+          <button type="button" class="sort-btn" data-sort="name">이름순</button>
+          <button type="button" class="sort-btn" data-sort="quantity">수량순</button>
+          <button type="button" class="sort-btn" data-sort="received_date">입고일순</button>
+        </div>
+      </div>
+
+      <label class="shortage-toggle">
+        <input type="checkbox" id="shortage-only-toggle" />
+        부족 물품만 보기
+      </label>
+
+      <div class="item-list" id="item-list">
+        <p class="empty">불러오는 중...</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js?v=1"></script>
+  <script src="assets/js/theme.js?v=1"></script>
+  <script src="assets/js/nickname.js?v=1"></script>
+  <script src="assets/js/nav.js?v=1"></script>
+  <script src="assets/js/item.js?v=1"></script>
+</body>
+</html>

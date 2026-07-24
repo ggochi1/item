@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>물품 등록 - 공용 물품 관리</title>
+<script>
+  (function () {
+    var pref = localStorage.getItem('supply-app-theme') || 'system';
+    var resolved = pref === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : pref;
+    document.documentElement.setAttribute('data-theme', resolved);
+  })();
+</script>
+<link rel="stylesheet" href="assets/css/styles.css?v=1" />
+</head>
+<body>
+  <div class="app-shell">
+    <button id="hamburger-btn" class="hamburger-btn" aria-label="메뉴 열기" aria-expanded="false">☰</button>
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+    <aside id="sidebar" class="sidebar"></aside>
+
+    <main class="content">
+      <h1 class="page-title">물품 등록</h1>
+      <div id="register-error" class="error-banner" hidden></div>
+      <div id="register-success" class="success-banner" hidden></div>
+
+      <form id="register-form" class="form">
+        <div class="form-field">
+          <label for="name-input">물품 이름</label>
+          <input type="text" id="name-input" required maxlength="60" />
+        </div>
+
+        <div class="form-field">
+          <label for="category-select">카테고리</label>
+          <select id="category-select" required></select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="quantity-input">수량</label>
+            <input type="number" id="quantity-input" min="0" step="1" required />
+          </div>
+          <div class="form-field">
+            <label for="target-input">적정 재고량</label>
+            <input type="number" id="target-input" min="0" step="1" required />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="received-date-input">입고일</label>
+          <input type="date" id="received-date-input" required />
+        </div>
+
+        <div class="form-field">
+          <label for="nickname-form-input">등록자 닉네임</label>
+          <input type="text" id="nickname-form-input" required maxlength="20" />
+        </div>
+
+        <div class="form-actions">
+          <a href="item.html" class="btn btn-secondary">취소</a>
+          <button type="submit" class="btn btn-primary">등록</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js?v=1"></script>
+  <script src="assets/js/theme.js?v=1"></script>
+  <script src="assets/js/nickname.js?v=1"></script>
+  <script src="assets/js/nav.js?v=1"></script>
+  <script src="assets/js/register.js?v=1"></script>
+</body>
+</html>
