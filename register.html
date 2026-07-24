@@ -13,7 +13,8 @@
     document.documentElement.setAttribute('data-theme', resolved);
   })();
 </script>
-<link rel="stylesheet" href="assets/css/styles.css?v=1" />
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="assets/css/styles.css?v=4" />
 </head>
 <body>
   <div class="app-shell">
@@ -23,6 +24,45 @@
 
     <main class="content">
       <h1 class="page-title">물품 등록</h1>
+
+      <section class="ai-section">
+        <h2 class="section-heading">말로 등록하기 (AI)</h2>
+        <p class="ai-hint">
+          예) "볼펜 20개랑 물티슈 5개 들어왔어", "어제 A4용지 3박스 들어옴" 처럼 문장으로 적으면 여러 건으로 나눠서 등록 준비를 해 드려요.
+          삭제나 수량 줄이기 요청은 반영되지 않습니다.
+        </p>
+        <div class="ai-controls">
+          <select id="ai-model-select" class="ai-model-select"></select>
+          <textarea id="ai-input" class="ai-textarea" rows="3" placeholder="예) 볼펜 20개랑 물티슈 5개 들어왔어"></textarea>
+          <button type="button" id="ai-analyze-btn" class="btn btn-primary">AI로 분석하기</button>
+        </div>
+        <div id="ai-status" class="empty" hidden></div>
+        <div id="ai-error" class="error-banner" hidden></div>
+
+        <div id="ai-preview-section" class="preview-section" hidden>
+          <p id="ai-preview-summary" class="preview-summary"></p>
+          <div class="table-wrap">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>물품이름</th>
+                  <th>수량</th>
+                  <th>카테고리</th>
+                  <th>입고일</th>
+                </tr>
+              </thead>
+              <tbody id="ai-preview-body"></tbody>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="ai-cancel-btn" class="btn btn-secondary">취소</button>
+            <button type="button" id="ai-confirm-btn" class="btn btn-primary">확인하고 등록</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-divider"><span>또는 직접 입력</span></div>
+
       <div id="register-error" class="error-banner" hidden></div>
       <div id="register-success" class="success-banner" hidden></div>
 
@@ -67,10 +107,11 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/config.js?v=1"></script>
+  <script src="assets/js/config.js?v=2"></script>
   <script src="assets/js/theme.js?v=1"></script>
   <script src="assets/js/nickname.js?v=1"></script>
-  <script src="assets/js/nav.js?v=1"></script>
+  <script src="assets/js/nav.js?v=2"></script>
+  <script src="assets/js/ai-register.js?v=1"></script>
   <script src="assets/js/register.js?v=1"></script>
 </body>
 </html>

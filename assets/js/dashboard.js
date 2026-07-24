@@ -96,7 +96,7 @@
         labels: CATEGORIES,
         datasets: [{
           data: counts,
-          backgroundColor: ['#2563eb', '#f59e0b', '#10b981', '#6b7280'],
+          backgroundColor: ['#4f46e5', '#f59e0b', '#10b981', '#94a3b8'],
           borderWidth: 0,
         }],
       },

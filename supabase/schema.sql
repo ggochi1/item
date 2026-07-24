@@ -264,3 +264,90 @@ alter function public.delete_item(uuid, text) set search_path = public;
 
 grant execute on function public.create_item(text, text, integer, integer, date, text) to anon, authenticated;
 grant execute on function public.delete_item(uuid, text) to anon, authenticated;
+
+-- ------------------------------------------------------------
+-- 엑셀 일괄 업로드(import_items)
+-- p_rows: [{name, category, quantity, target_quantity, received_date, actor_nickname}, ...]
+-- 같은 이름은 이 함수 안에서 수량을 합산해 한 건으로 처리하고(행이 늘지 않음),
+-- 이미 있는 물품이면 수량만 더하고(카테고리 등은 유지), 없으면 새로 만든다.
+-- 전체가 하나의 함수 호출(=하나의 트랜잭션)로 처리되므로 중간에 오류가 나면
+-- (예: 카테고리 값 오류로 CHECK 제약 위반) 이 호출로 인한 변경은 전부 롤백된다.
+-- ------------------------------------------------------------
+
+create or replace function public.import_items(p_rows jsonb)
+returns table(item_name text, result_action text, quantity_after integer)
+language plpgsql
+as $$
+declare
+  r record;
+  v_item public.items;
+  v_before integer;
+  v_after integer;
+begin
+  for r in
+    select
+      x.name,
+      sum(x.quantity)::integer as total_quantity,
+      (array_agg(x.category order by x.ord))[1] as category,
+      (array_agg(x.target_quantity order by x.ord))[1] as target_quantity,
+      (array_agg(x.received_date order by x.ord))[1] as received_date,
+      (array_agg(x.actor_nickname order by x.ord))[1] as actor_nickname
+    from (
+      select
+        (t.elem->>'name') as name,
+        (t.elem->>'category') as category,
+        (t.elem->>'quantity')::integer as quantity,
+        (t.elem->>'target_quantity')::integer as target_quantity,
+        (t.elem->>'received_date')::date as received_date,
+        (t.elem->>'actor_nickname') as actor_nickname,
+        t.ord as ord
+      from jsonb_array_elements(p_rows) with ordinality as t(elem, ord)
+    ) x
+    group by x.name
+  loop
+    if r.name is null or length(trim(r.name)) = 0 then
+      raise exception 'row with empty name in import payload';
+    end if;
+    if r.actor_nickname is null or length(trim(r.actor_nickname)) = 0 then
+      raise exception 'row for item % missing actor_nickname', r.name;
+    end if;
+
+    select * into v_item from public.items where items.name = r.name for update;
+
+    if found then
+      v_before := v_item.quantity;
+      v_after := v_before + r.total_quantity;
+
+      update public.items set quantity = v_after where id = v_item.id;
+
+      insert into public.item_logs
+        (item_id, item_name_snapshot, action, quantity_before, quantity_after, quantity_change, actor_nickname)
+      values
+        (v_item.id, v_item.name, 'IMPORT', v_before, v_after, r.total_quantity, r.actor_nickname);
+
+      item_name := v_item.name;
+      result_action := 'UPDATED';
+      quantity_after := v_after;
+    else
+      insert into public.items (name, category, quantity, target_quantity, received_date, created_by_nickname)
+      values (r.name, r.category, r.total_quantity, r.target_quantity, r.received_date, r.actor_nickname)
+      returning * into v_item;
+
+      insert into public.item_logs
+        (item_id, item_name_snapshot, action, quantity_before, quantity_after, quantity_change, actor_nickname)
+      values
+        (v_item.id, v_item.name, 'IMPORT', 0, v_item.quantity, v_item.quantity, r.actor_nickname);
+
+      item_name := v_item.name;
+      result_action := 'CREATED';
+      quantity_after := v_item.quantity;
+    end if;
+
+    return next;
+  end loop;
+end;
+$$;
+
+alter function public.import_items(jsonb) set search_path = public;
+
+grant execute on function public.import_items(jsonb) to anon, authenticated;

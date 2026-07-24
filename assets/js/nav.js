@@ -3,6 +3,7 @@
     { href: 'index.html', label: '현황 대시보드', icon: '📊' },
     { href: 'item.html', label: '물품 목록', icon: '📦' },
     { href: 'register.html', label: '물품 등록', icon: '➕' },
+    { href: 'import.html', label: '엑셀 업로드', icon: '📥' },
   ];
 
   function currentPage() {
